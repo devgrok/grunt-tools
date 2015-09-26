@@ -33,5 +33,6 @@
   },
   "keywords": [
     "gruntplugin"
-  ]
+  ],
+  "private": true
 }
