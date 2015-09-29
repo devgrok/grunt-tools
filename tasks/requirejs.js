@@ -4,8 +4,9 @@
  *
  * Copyright (c) 2014 Tyler Kellen, contributors
  * Licensed under the MIT license.
+ *
+ * Copyright 2015 Chris Watts
  */
-
 module.exports = function (grunt) {
     'use strict';
 
@@ -29,17 +30,29 @@ module.exports = function (grunt) {
     //    };
     //});
 
-    grunt.registerMultiTask('requirejs', 'Build a RequireJS project.', function () {
+    grunt.registerMultiTask('requirejs', 'Build & optimise a RequireJS project.', function () {
 
         var done = this.async();
+        /**
+         * @callback doneCallback
+         * @param {function} done
+         * @param response
+         */
+        /**
+         * @property {doneCallback} done - callback function for completion
+         * @property {number} logLevel - 0=trace 4=off
+         */
         var options = this.options({
             logLevel: grunt.option('verbose') ? LOG_LEVEL_TRACE : LOG_LEVEL_WARN,
+            //empty impl incase the user doesn't provide one
             done: function (done, response) {
                 done();
+                grunt.verbose.write("Response ").writeln(typeof response);
             }
         });
+
         // The following catches errors in the user-defined `done` function and outputs them.
-        var tryCatch = function (fn, done, output) {
+        var tryCatch = function (/* doneCallback */ fn, /* done */ done, output) {
             try {
                 fn(done, output);
             } catch (e) {
@@ -47,7 +60,22 @@ module.exports = function (grunt) {
             }
         };
 
-        requirejs("es6-symbol/polyfill");
+        if (this.files.length > 0 && grunt.option("verbose")) {
+            this.files.forEach(function (obj) {
+                var output = [];
+                if ('src' in obj) {
+                    output.push(obj.src.length > 0 ? grunt.log.wordlist(obj.src) : '[no src]'.yellow);
+                }
+                if ('dest' in obj) {
+                    output.push('-> ' + (obj.dest ? String(obj.dest).cyan : '[no dest]'.yellow));
+                }
+                if (output.length > 0) {
+                    grunt.verbose.warn('Ignoring passed in files: ' + output.join(' '));
+                }
+            });
+        }
+
+        //requirejs("es6-symbol/polyfill");
         requirejs.optimize(options, tryCatch.bind(null, options.done, done));
     });
 };

@@ -24,7 +24,8 @@
     "grunt": "~0.4.5"
   },
   "peerDependencies": {
-    "grunt": "~0.4.5"
+    "grunt": "0.4.x",
+    "requirejs": "2.1.x"
   },
   "dependencies": {
     "es6-symbol": "^2.0.1",
