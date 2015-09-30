@@ -10,8 +10,7 @@
 module.exports = function (grunt) {
     'use strict';
 
-    /**  @type {r#requirejs} */
-    //var requirejs = require('requirejs');
+    var requirejs = require('requirejs');
     var LOG_LEVEL_TRACE = 0, LOG_LEVEL_WARN = 2;
 
     requirejs.config({
@@ -62,6 +61,7 @@ module.exports = function (grunt) {
         };
 
         if (this.files.length > 0 && grunt.option("verbose")) {
+            grunt.verbose.warn("Ignoring passed in files");
             this.files.forEach(function (obj) {
                 var output = [];
                 if ('src' in obj) {
@@ -71,7 +71,7 @@ module.exports = function (grunt) {
                     output.push('-> ' + (obj.dest ? String(obj.dest).cyan : '[no dest]'.yellow));
                 }
                 if (output.length > 0) {
-                    grunt.verbose.warn('Ignoring passed in files: ' + output.join(' '));
+                    grunt.verbose.writeln('Files: ' + output.join(' '));
                 }
             });
         }
