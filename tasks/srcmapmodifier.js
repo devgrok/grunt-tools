@@ -15,19 +15,24 @@ module.exports = function (grunt) {
         //console.log.writeln("sourcemap-modifier: Got files %j", this.options);
 
         // Merge task-specific and/or target-specific options with these defaults.
+        /**
+         * @property base
+         * @property {string} fileBase.src
+         * @property {string} fileBase.dest
+         */
         var options = this.options({});
 
         //grunt.log.writeln("sourcemap-modifier: Using\n\toptions %j\n\targs %j", options, arguments);
 
-        var dat = this.data;
+        //var dat = this.data;
         var files;
-        if (this.data.files) {
+        if (this.files && this.files.length) {
             //grunt.log.writeln("data.files %j", dat.files);
-            files = dat.files;
+            files = this.files;
         }
         else {
             //grunt.log.writeln("this.files %j", this.files);
-            files = this.files;
+            files = grunt.normalizeMultiTaskFiles(dat.files);
         }
 
 
@@ -38,41 +43,52 @@ module.exports = function (grunt) {
         //}
 
         //var files = grunt.file.expand(this.data.files);
-        var base = dat.base;
+        var base = options.base;
 
         //grunt.log.writeln("sourcemap-modifier: expanded files %j", files);
 
         if (!Array.isArray(files))
             files = [files];
 
-        for (var i =0; i<files.length; i++) {
+        var processed;
+        for (var i = 0; i < files.length; i++) {
             var file = files[i];
             //grunt.verbose.subhead("Processing " + file);
-            for (var key in base) {
-                var dstBase = base[key];
-                grunt.log.writeln("Processing sourceMap %j ... '%s'", file.src, key);
+            var keys = Object.keys(base);
+            processed = {};
+            grunt.log.writeln("Processing sourceMap %j", file.src);
+            var filedata = grunt.file.read(file.src, {encoding: "utf-8"});
+            var parsed = JSON.parse(filedata);
 
-                var filedata = grunt.file.read(file.src, {encoding: "utf-8"});
-                var parsed = JSON.parse(filedata);
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var dstBase = base[key];
+                var count = 0;
+                grunt.log.write("Processing mapping '%s' --> '%s'", key, dstBase);
+
 
                 for (var srcNum in parsed.sources) {
                     var source = parsed.sources[srcNum];
 
-                    if (source.indexOf(key) === 0) {
-                        parsed.sources[srcNum] = source.replace(key, dstBase);
+                    if (!processed[source] && source.indexOf(key) === 0) {
+                        source = source.replace(key, dstBase);
+                        parsed.sources[srcNum] = source;
+                        processed[source] = true;
+                        //grunt.verbose.log("\n" + source);
+                        count++;
                     }
                 }
-
-                if (typeof dat.fileBase !== "undefined") {
-                    if (parsed.file.indexOf(dat.fileBase.src) === 0) {
-                        parsed.file = parsed.file.replace(
-                            dat.fileBase.src,
-                            dat.fileBase.dst
-                        );
-                    }
-                }
-                grunt.file.write(file.dest, JSON.stringify(parsed));
+                grunt.log.writeln("  processed " + count);
             }
+            if (typeof options.fileBase !== "undefined") {
+                if (parsed.file.indexOf(options.fileBase.src) === 0) {
+                    parsed.file = parsed.file.replace(
+                        options.fileBase.src,
+                        options.fileBase.dest
+                    );
+                }
+            }
+            grunt.file.write(file.dest, JSON.stringify(parsed));
         }
     });
 };

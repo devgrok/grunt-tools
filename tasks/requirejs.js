@@ -10,7 +10,8 @@
 module.exports = function (grunt) {
     'use strict';
 
-    var requirejs = require('requirejs');
+    /**  @type {r#requirejs} */
+    //var requirejs = require('requirejs');
     var LOG_LEVEL_TRACE = 0, LOG_LEVEL_WARN = 2;
 
     requirejs.config({
