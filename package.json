@@ -1,7 +1,7 @@
 {
   "name": "requirejs-module-packager",
   "title": "requirejs-module-packager",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "requirejs-module-packager",
   "author": {
     "name": "Chris Watts",
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "es6-symbol": "^2.0.1",
-    "grunt-babel": "^5.0.1",
+    "grunt-babel": "^6.0.0",
     "requirejs": "^2.1.20"
   },
   "keywords": [
